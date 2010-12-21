@@ -1,0 +1,16 @@
+# ignore ssh-agent, and only use "-i identity.pem" on the command line
+# or any IdentityFile in this config
+IdentitiesOnly yes
+
+# This is what you get from a generate-key-pair command in the dashboard
+IdentityFile identity/identity.pem
+
+# Don't be strict about host-names and IPs, since they change frequently
+# in the cloud
+HashKnownHosts no
+StrictHostKeyChecking no
+UserKnownHostsFile ssh_known_hosts
+GlobalKnownHostsFile ssh_known_hosts
+
+# ubuntu ec2 servers use "ubunutu" as the username
+User ubuntu

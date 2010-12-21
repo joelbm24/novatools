@@ -1,0 +1,5 @@
+cloudshell/hosts.txt
+*.pem
+cloudshell/ssh_known_hosts
+cloudshell/identity
+cloudshell/identities/*

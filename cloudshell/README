@@ -1,0 +1,49 @@
+Setup
+=====
+
+In your .bashrc
+
+  CLOUDSHELL_ROOT=your_installation_directory
+  CLOUD_KEYPAIR=your_keypair_name # for launching instances
+  . ${CLOUDSHELL_ROOT}/source.bash
+
+Download your project zip with nova-mange project zipfile
+Extract the zipfile into ${CLOUDSHELL_ROOT}/identities/ENDPOINT/
+Activate and switch identities with `.cloud.identity ENDPOINT`
+Where ENDPOINT is something like a region or cluster name.
+Rename novarc to cloudrc
+
+When you generate a keypair, copy your .pem here as identity.pem
+(or another name, and add an IdentityFile line in ssh_config)
+
+Use
+===
+
+  cloud alias NICKNAME IP
+    # So you can have quick names w/o dns or privileges to /etc/hosts
+  cloud lookup [NICKNAME]
+    # Lookup ip for an IP for all or a specified host alias
+  cloud id [NICKNAME]
+    # Lookup the instance id (i-123456) for a host, or all hosts
+  cloud shell NICKNAME
+    # Lauch a shell using your keypair on the specified host
+  cloud send NICKNAME REMOTE-DIR FILE1 ... FILEn
+    # Send files to the specified host
+  cloud script NICKNAME SCRIPT
+    # Run a script from ${CLOUDSHELL_ROOT}/commands/ on specified host
+  cloud exec NICNAME CMD [arg0 ... argN]
+    # Run a remote command on the specified host (wraps ssh $nickname CMD)
+
+Batching
+========
+
+  . batch/SCRIPT [ARGS]
+
+So you can build more complex tools using cloudshell.
+(Just a fancy way to  store and invoke shell scripts.)
+
+TODO
+====
+
+* Make keypair name be configurable per-identity
+* Look for rc files other than cloudrc (novarc, etc)
