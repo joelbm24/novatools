@@ -12,18 +12,17 @@ class Puma:
 
     def connect(self):
         #TODO add some error handling
-        return boto.connect_ec2(aws_access_key_id=self.config["access_id"],
+        self.conn = boto.connect_ec2(aws_access_key_id=self.config["access_id"],
                                 aws_secret_access_key=self.config["access_secret"],
                                 is_secure=False,
                                 region=RegionInfo(None, 'nova', "10.255.24.10"),
                                 port=8773,
                                 path='/services/Cloud')
-
+        return self.conn()
     def image_list(self):
-        self.images = self.connect.get_all_images()
+        print self.connect.get_all_images()
 
     def run_instance(self, image_name):
         #TODO loop through the list images and find a matching user specified image
-        image = self.images[0]
-        #image.run()
+        image = self.image_list[0]
 
