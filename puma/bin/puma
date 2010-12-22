@@ -3,8 +3,9 @@
 import sys, os
 sys.path.append(os.environ["HOME"] + '/novatools/puma/lib')
 import puma
+puma = puma.Puma()
 
 class CLI:
-    def __init__(self):
-        self.config = puma.config()
-        self.connect = puma.connect()
+    puma.config()
+    puma.connect()
+
