@@ -7,5 +7,5 @@ puma = puma.Puma()
 
 class CLI:
     puma.config()
-    puma.connect()
+    puma.image_list()
 
