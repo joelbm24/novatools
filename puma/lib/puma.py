@@ -3,7 +3,7 @@
 import yaml, boto, os
 from boto.ec2.regioninfo import RegionInfo
 
-class Puma:
+class Puma():
     def __init__(self):
         self.puma_dir = os.environ["HOME"] + "/.puma"
     def config(self):
@@ -11,19 +11,26 @@ class Puma:
         return yaml.load(config_file)
 
     def connect(self):
-        #TODO add some error handling
-        self.conn = boto.connect_ec2(aws_access_key_id=self.config["access_id"],
-                                aws_secret_access_key=self.config["access_secret"],
+        try:
+            return boto.connect_ec2(aws_access_key_id=self.config()["access_id"],
+                                aws_secret_access_key=self.config()["access_secret"],
                                 is_secure=False,
                                 region=RegionInfo(None, 'nova', "10.255.24.10"),
                                 port=8773,
                                 path='/services/Cloud')
-        return self.conn
-    def image_list(self):
-        self.connect().get_all_images()
-        #return self.connect.get_all_images()
-
+        except:
+            print "ERROR: could not connect"
+    def get_image_list(self):
+        foo = []
+        for image in self.connect().get_all_images():
+            foo.append(image.id)
+        return foo
     def run_instance(self, image_name):
         #TODO loop through the list images and find a matching user specified image
-        image = self.image_list[0]
+        image = self.get_image_list()
+        try:
+            bar = self.get_image_list()[image.index(image_name)]
+            print bar
+        except:
+            print "Image does not exist"
 
