@@ -18,9 +18,10 @@ class Puma:
                                 region=RegionInfo(None, 'nova', "10.255.24.10"),
                                 port=8773,
                                 path='/services/Cloud')
-        return self.conn()
+        return self.conn
     def image_list(self):
-        print self.connect.get_all_images()
+        self.connect().get_all_images()
+        #return self.connect.get_all_images()
 
     def run_instance(self, image_name):
         #TODO loop through the list images and find a matching user specified image
