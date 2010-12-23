@@ -3,3 +3,4 @@ westrc
 eastrc
 *.conf
 *.swp
+*.pyc
