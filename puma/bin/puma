@@ -1,10 +1,172 @@
-#! /usr/bin/python
+#!/usr/bin/python
 
-import sys, os
-sys.path.append(os.environ["HOME"] + '/novatools/puma/lib')
+#Copyright 2010 Joel Buchheim-Moore
+
+#Licensed under the Apache License, Version 2.0 (the "License");
+#you may not use this file except in compliance with the License.
+#You may obtain a copy of the License at
+
+#http://www.apache.org/licenses/LICENSE-2.0
+
+#Unless required by applicable law or agreed to in writing, software
+#distributed under the License is distributed on an "AS IS" BASIS,
+#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#See the License for the specific language governing permissions and
+#limitations under the License.
+
+import sys, os, re
+sys.path.append(os.environ["HOME"] + '/puma/lib')
 import puma
 puma = puma.Puma()
+from optparse import OptionParser
+parser = OptionParser()
 
 class CLI:
-    puma.get_image_list()
+    def launch(self, name, num, type):
+        puma.run_instance(name, num, type)
 
+    def list(self, arg):
+        if arg == "images":
+            for image in puma.get_image_list():
+                if image.type == 'machine':
+                    print image.id + "\t" + str(image.owner_id)
+                else:
+                    pass
+
+        if arg == "instances":
+            for instance in puma.get_instance_list():
+                print instance.id, "\t", instance.image_id, "\t", instance.instance_type, "\t", instance.dns_name, "\t", instance.state, "\t", instance.key_name
+
+        if arg == "volumes":
+            for vol in puma.get_volume_list():
+                print vol.id, "\t", str(vol.size) + "GB", "\t", vol.status
+
+        if arg == "keys":
+            for key in puma.get_keypairs():
+                print key.name, "\t", key.fingerprint
+
+    def ssh(self, arg):
+        # TODO add better error checking
+        if re.search("\d", arg):
+            os.system("ssh -i" + puma.puma_dir+"/creds/"+puma.config["keyfile"] + " " + arg)
+        else:
+            try:
+                for instance in puma.get_instance_list():
+                    if str(instance.id) == arg:
+                        os.system("ssh -i" + puma.puma_dir+"/creds/"+puma.config["keyfile"]+" "+instance.dns_name)
+            except ValueError:
+                print "ERROR: Instance does not exist"
+
+    def key(self, arg, name):
+        if arg == 'add':
+            try:
+                print puma.add_key(name).material
+            except:
+                print "ERROR: Key already added"
+
+        if arg == "delete":
+            key_names = []
+            for key in puma.get_keypairs():
+                key_names.append(key.name)
+            try:
+                puma.delete_keypair(key_names[key_names.index(name)])
+            except:
+                print "ERROR: Keypair does not exist"
+
+    def term(self, name):
+        puma.terminate_instance(name)
+    def create_volume(self, size):
+        puma.create_volume(size)
+    def delete_volume(self, vol_name):
+        puma.delete_volume(vol_name)
+    def attach_volume(self, vol_name, inst_name, dev):
+        puma.attach_volume(vol_name, inst_name, dev)
+    def detach_volume(self, vol_name):
+        puma.detach_volume(vol_name)
+
+cli = CLI()
+
+parser.add_option("--list", help="list instances, images volumes", metavar="TYPE")
+parser.add_option("--launch", help="launch an image", metavar="IMAGE")
+parser.add_option("--ssh", help="ssh into an instance", metavar="INSTANCE")
+parser.add_option("--term", help="terminates a specific instance", metavar="INSTANCE_ID")
+parser.add_option("--volume", help="create, attach, detach, and destroy a volume", metavar="OPTION VOLUME")
+parser.add_option("--key", help="create, delete a key", metavar="OPTION KEY")
+parser.add_option("--package", help="bundles, registers and uploads an image", metavar="IMAGE")
+
+(options, args) = parser.parse_args()
+
+if options.list:
+    if options.list == "images":
+        cli.list("images")
+    elif options.list == "instances":
+        cli.list("instances")
+    elif options.list == "volumes":
+        cli.list("volumes")
+    elif options.list == "keys":
+        cli.list('keys')
+    else:
+        print "ERROR: Not a valid expression"
+
+elif options.launch:
+    try:
+        try:
+            try:
+                cli.launch(options.launch, int(args[0]), args[1])
+            except:
+                cli.launch(options.launch, int(args[0]), "m1.tiny")
+        except:
+            cli.launch(options.launch, 1, args[0])
+    except:
+        cli.launch(options.launch, 1, "m1.tiny")
+
+elif options.ssh:
+    cli.ssh(options.ssh)
+
+elif options.term:
+    args.append(options.term)
+    cli.term(args)
+
+elif options.volume:
+    if options.volume == "create":
+        try:
+            cli.create_volume(args[0])
+        except:
+            print "No size specified. Defaulting to 2GB"
+            cli.create_volume(2)
+
+    elif options.volume == "delete":
+        try:
+            cli.delete_volume(args[0])
+        except:
+            print "ERROR: Need to specify a volume"
+            print "Usage: puma --volume delete <volume name>"
+
+    elif options.volume == "attach":
+        try:
+            cli.attach_volume(args[0], args[1], args[2])
+        except:
+            print "ERROR: Need to specify the volume name, instance name and device name"
+            print "Usage: puma --volume attach <volume name> <instance name> <device name>"
+
+    elif options.volume == "detach":
+        try:
+            cli.detach_volume(args[0])
+        except:
+            print "ERROR: Need to specify volume name"
+            print "Usage: puma --volume detach <volume name>"
+
+elif options.package:
+    if options.package != None:
+        print "Not implemented yet"
+
+elif options.key:
+    if options.key == "add":
+        cli.key('add', args[0])
+    if options.key == 'delete':
+        cli.key('delete', args[0])
+
+elif options.list == None:
+    print "Try \"puma -h\" for options"
+else:
+    print "ERROR: Not a valid expression"

@@ -1,0 +1,71 @@
+Description:
+    puma is a command line tool for interfacing with nova
+
+Setup and Installation:
+    1) Install the dependancies
+        a. Install boto: sudo apt-get install python-boto or downloading at
+        http://code.google.com/p/boto/downloads/list
+        b. Download PyYaml: http://pyyaml.org/wiki/PyYAML
+        c. Install PyYaml: cd /path/to/pyyaml; sudo setup.py install
+
+    After you have installed all the dependancies you have to make a .puma directory in your home directory.
+    You also have to make a folder that holds all of your credentials
+
+    2) mkdir ~/.puma
+    3) mkdir ~/.puma/creds
+
+    Once this is done and u have copied your credentials to the "creds" folder you can now make your config file.
+
+    4) Create the config file:
+        here is an example config file
+
+        access_id: <access key id>
+        access_secret: <secret key>
+        keyfile: keyfile.pem
+        port: 8773
+        ip: 127.0.0.1
+        location: nova
+        path: services/Cloud
+        keyname: keyname
+
+    You should fill in the key file with the apropriate information unless the defualts are fine for you.
+
+    5) Edit your bashrc file to include the line:
+        export PATH=${PATH}:/home/<username>/puma/bin
+
+Instructions of Use:
+    For help type:
+        $ puma -h
+
+    To view all instances:
+        $ puma --list instances
+
+    To view all images:
+        $ puma --list images
+
+    To view all volumes:
+        $ puma --list volumes
+
+    To launch an image you have to specify the image name:
+        $ puma --launch <image>
+    You can also specify what type and how many to launch at once.
+        $ puma --launch <image> <count> <type>
+
+    Note: You have to specify the amount before you can specify the type
+
+    To terminate an instance:
+        $ puma --term <instance>
+        or
+        $ puma --term <instance> <instance>
+
+    To create a volume:
+        $ puma --volume create <volume size in GB>
+
+    To attach a volume, you have to specify the volume, instance and device name in that order:
+        $ puma --volume attach <volume> <instance> <device>
+
+    To detach a volume:
+        $ puma --volume detach <volume>
+
+    To delete a volume:
+        $ puma --volume delete <volume>
